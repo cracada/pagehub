@@ -16,13 +16,13 @@ button{;background-color:#7b90a8;color:#fff;border-radius:3px;margin: 0;padding-
 <button onclick="cpp('https://a.lqtv.top/m3u/tv.m3u')">TV2</button>
 <button onclick="cpp('https://raw.crsay.com/fanmingming/live/main/tv/m3u/ipv6.m3u')">TV3</button>
 <button onclick="cpp('https://tv.crsay.com/box/')">主仓</button>
-<button type='button' onclick="cpp('https://m.crsay.com/tv/box/')">备用</button>
+<button onclick="cpp('https://m.crsay.com/tv/box/')">备用</button>
 <button onclick="cpp('https://tv.nxog.top/')">欧歌</button>
 </div>
 
 <script language="javascript">
 var url = decodeURI(window.location.search).trim().slice(1); //1?2
-if(url.indexOf('https://') = -1 && url.indexOf('http://') != -1){var ifr="about:blank";}
+//if(url.indexOf('https://') = -1 && url.indexOf('http://') != -1){var ifr="about:blank";}
 document.write ("<iframe src='"+url+"'></iframe>");
 function cpp(txt){let area =document.createElement('divc');area.innerText=txt;document.body.appendChild(area);let range =document.createRange();range.selectNode(area);let selection = window.getSelection();if (selection.rangeCount>0) selection.removeAllRanges();selection.addRange(range);document.execCommand('copy');selection.removeAllRanges();document.body.removeChild(area);}
 </script>
