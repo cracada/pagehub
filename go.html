@@ -6,8 +6,9 @@
 </head><body>
 <script language="javascript">
 var url = decodeURI(window.location.search);
-var arg = url.trim().slice(1); //[?]
-if (arg.toLowerCase().startsWith("http://") || arg.toLowerCase().startsWith("https://")) {window.location.href=arg;}
+var arg = url.slice(1).trimStart(); 
+if(!arg) {window.location.href="/";}
+//if (arg.toLowerCase().startsWith("http://") || arg.toLowerCase().startsWith("https://")) {window.location.href=arg;}
 if (arg.indexOf('.') == -1) {
 	var ak=arg.toLowerCase();
 	var av="";
