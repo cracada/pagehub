@@ -1,0 +1,36 @@
+<!--redirect url -->
+<html><head>
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-control" content="no-cache">
+<meta http-equiv="Cache" content="no-cache">
+</head><body>
+<script language="javascript">
+
+var url = decodeURI(window.location.search);
+//var arg = url.trim().slice(4); //redir.htm[?go=]
+var arg = url.trim().slice(1); //redir.htm[?]
+
+ if(arg.indexOf('https://') != -1 || arg.indexOf('http://') != -1){
+  window.location.href=arg;
+  exit;
+  }
+switch(arg)
+{
+case "bjsj":
+  window.location.href="http://bjtime.cn/";
+  break;
+case "whois":
+  window.location.href="http://mwhois.chinaz.com/";
+  break;
+case "whois": 
+  window.location.href="http://kk.crsay.com/one/?v="+Math.random();
+  //window.location = 'http://kk.crsay.com/one/?v='+Math.random()
+  break;
+
+default:
+ //alert("No Define");
+  window.location.href="https://m.baidu.com/s?wd="+arg;
+}
+</script>
+</body></html>
