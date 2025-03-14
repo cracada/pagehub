@@ -1,0 +1,46 @@
+<html><head>
+<!--meta http-equiv="Expires" content="0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-control" content="no-cache">
+<meta http-equiv="Cache" content="no-cache"-->
+</head><body>
+<script language="javascript">
+var url = decodeURI(window.location.search);
+var arg = url.slice(1).trimStart(); 
+if(!arg) {window.location.href="/";}
+//if (arg.toLowerCase().startsWith("http://") || arg.toLowerCase().startsWith("https://")) {window.location.href=arg;}
+if (arg.indexOf('.') == -1) {
+	var ak=arg.toLowerCase();
+	var av="";
+} else {
+	var firstpoint=arg.indexOf('.');
+	var ak=arg.slice(0,firstpoint).toLowerCase();
+	var av=arg.slice(firstpoint + 1);
+}
+
+switch(ak)
+{
+case "d":
+  window.location.href="http://www.221220.xyz/d/"+av;
+  break;
+case "m": 
+  window.location.href="http://www.221220.xyz/m/"+av;
+  break;
+case "o": 
+  window.location.href="http://www.221220.xyz/o/"+av;
+  break;
+case "raw":
+  window.location.href="https://raw.221220.xyz/"+av;
+  break;
+case "tv": 
+  window.location.href="http://tv.221220.xyz/"+av;
+  break;
+case "git":
+  window.location.href="https://git.221220.xyz/"+av;
+  break;
+default:
+  //break;
+  window.location.href="https://www.221220.xyz/";
+}
+</script>
+</body></html>
