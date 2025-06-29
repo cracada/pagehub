@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Commander 颜色代码转换工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(0, 0, 20, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.7);
+        }
+        
+        .subtitle {
+            color: #bbb;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .converter-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: rgba(30, 30, 60, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        h2 {
+            color: #81d4fa;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        label {
+            flex: 0 0 180px;
+            font-weight: 600;
+            color: #bbdefb;
+        }
+        
+        input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #3949ab;
+            border-radius: 8px;
+            background: rgba(10, 15, 40, 0.8);
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(to right, #3949ab, #1e88e5);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, #283593, #1565c0);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(10, 15, 40, 0.9);
+            border-radius: 8px;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .color-preview {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .preview-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-info {
+            flex: 1;
+        }
+        
+        .explanation {
+            background: rgba(25, 35, 70, 0.8);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            line-height: 1.7;
+        }
+        
+        .explanation h3 {
+            color: #81d4fa;
+            margin-bottom: 15px;
+        }
+        
+        .explanation ul {
+            padding-left: 25px;
+            margin: 15px 0;
+        }
+        
+        .explanation li {
+            margin-bottom: 10px;
+        }
+        
+        .examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .example-card {
+            background: rgba(40, 50, 90, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #3949ab;
+        }
+        
+        .example-card h4 {
+            color: #81d4fa;
+            margin-bottom: 10px;
+        }
+        
+        .example-color {
+            height: 30px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #90a4ae;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            label {
+                flex: none;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Total Commander 颜色代码转换工具</h1>
+            <p class="subtitle">TotalCMD十进制颜色代码和标准HEX颜色双向转换</p>
+        </header>
+        
+        <div class="converter-section">
+            <h2>Total Commander 转 HEX 颜色</h2>
+            <div class="input-group">
+                <label for="tc-code">Total Commander 代码:</label>
+                <input type="text" id="tc-code" placeholder="例如: 16711680">
+                <button onclick="convertToHex()">转换为HEX</button>
+            </div>
+            <div class="result" id="hex-result">
+                <p>HEX 颜色将显示在这里</p>
+            </div>
+        </div>
+        
+        <div class="converter-section">
+            <h2>HEX 颜色转 Total Commander</h2>
+            <div class="input-group">
+                <label for="hex-color">HEX 颜色:</label>
+                <input type="text" id="hex-color" placeholder="例如: #0000FF">
+                <button onclick="convertToTC()">转换为TC代码</button>
+            </div>
+            <div class="result" id="tc-result">
+                <p>Total Commander 代码将显示在这里</p>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h3>Total Commander 颜色格式说明</h3>
+            <p>Total Commander 使用的十进制颜色代码实际上是一个32位整数，其格式为 <strong>AABBGGRR</strong>（十六进制表示）：</p>
+            <ul>
+                <li><strong>AA</strong> - Alpha通道（透明度），通常为00（不透明）</li>
+                <li><strong>BB</strong> - 蓝色分量（00-FF）</li>
+                <li><strong>GG</strong> - 绿色分量（00-FF）</li>
+                <li><strong>RR</strong> - 红色分量（00-FF）</li>
+            </ul>
+            <p>这与标准的 <strong>AARRGGBB</strong> 格式不同，因此需要转换：</p>
+            <ol>
+                <li>将十进制转换为8位十六进制</li>
+                <li>提取BBGGRR部分（忽略AA）</li>
+                <li>交换BB和RR位置，得到标准RRGGBB格式</li>
+            </ol>
+            
+            <div class="examples">
+                <div class="example-card">
+                    <h4>常见颜色示例：</h4>
+                    <div class="example-color" style="background-color: #FF0000;"></div>
+                    <p><strong>红色</strong><br>TC代码: 255<br>HEX: #FF0000</p>
+                </div>
+                <div class="example-card">
+                    <div class="example-color" style="background-color: #00FF00;"></div>
+                    <p><strong>绿色</strong><br>TC代码: 65280<br>HEX: #00FF00</p>
+                </div>
+                <div class="example-card">
+                    <div class="example-color" style="background-color: #0000FF;"></div>
+                    <p><strong>蓝色</strong><br>TC代码: 16711680<br>HEX: #0000FF</p>
+                </div>
+                <div class="example-card">
+                    <div class="example-color" style="background-color: #FFFF00;"></div>
+                    <p><strong>黄色</strong><br>TC代码: 65535<br>HEX: #FFFF00</p>
+                </div>                
+            </div>
+        </div>
+        
+        <footer>
+            <p>© Total Commander 颜色转换工具</p>
+        </footer>
+    </div>
+    
+    <script>
+        function convertToHex() {
+            const tcInput = document.getElementById('tc-code').value.trim();
+            const resultDiv = document.getElementById('hex-result');
+            
+            if (!tcInput) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">请输入Total Commander颜色代码</p>';
+                return;
+            }
+            
+            const tcCode = parseInt(tcInput);
+            if (isNaN(tcCode)) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">无效的数字格式</p>';
+                return;
+            }
+            
+            // 转换为8位十六进制字符串
+            let hexStr = tcCode.toString(16).toUpperCase().padStart(8, '0');
+            
+            // 提取颜色分量（格式为AABBGGRR）
+            const aa = hexStr.substring(0, 2);
+            const bb = hexStr.substring(2, 4);
+            const gg = hexStr.substring(4, 6);
+            const rr = hexStr.substring(6, 8);
+            
+            // 交换BB和RR位置得到标准RRGGBB格式
+            const hexColor = `#${rr}${gg}${bb}`;
+            
+            // 显示结果
+            resultDiv.innerHTML = `
+                <p><strong>转换结果:</strong></p>
+                <p>HEX 颜色: <strong>${hexColor}</strong></p>
+                <p>原始格式: AABBGGRR = <strong>${aa}${bb}${gg}${rr}</strong></p>
+                <div class="color-preview">
+                    <div class="preview-box" style="background-color: ${hexColor};"></div>
+                    <div class="color-info">
+                        <p>颜色预览</p>
+                        <p>RGB: ${parseInt(rr, 16)}, ${parseInt(gg, 16)}, ${parseInt(bb, 16)}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function convertToTC() {
+            const hexInput = document.getElementById('hex-color').value.trim();
+            const resultDiv = document.getElementById('tc-result');
+            
+            // 清理HEX输入
+            let hexColor = hexInput.replace('#', '');
+            
+            // 处理缩写格式
+            if (hexColor.length === 3) {
+                hexColor = hexColor.split('').map(c => c + c).join('');
+            }
+            
+            if (!hexColor || hexColor.length !== 6) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">请输入有效的6位HEX颜色代码</p>';
+                return;
+            }
+            
+            // 验证HEX格式
+            if (!/^[0-9A-Fa-f]{6}$/.test(hexColor)) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">无效的HEX颜色格式</p>';
+                return;
+            }
+            
+            // 转换为大写
+            hexColor = hexColor.toUpperCase();
+            
+            // 提取颜色分量（标准格式为RRGGBB）
+            const rr = hexColor.substring(0, 2);
+            const gg = hexColor.substring(2, 4);
+            const bb = hexColor.substring(4, 6);
+            
+            // 转换为Total Commander格式（AABBGGRR），AA固定为00（不透明）
+            const tcHex = `00${bb}${gg}${rr}`;
+            
+            // 转换为十进制
+            const tcCode = parseInt(tcHex, 16);
+            
+            // 显示结果
+            resultDiv.innerHTML = `
+                <p><strong>转换结果:</strong></p>
+                <p>Total Commander 代码: <strong>${tcCode}</strong></p>
+                <p>内部格式: AABBGGRR = <strong>00${bb}${gg}${rr}</strong></p>
+                <div class="color-preview">
+                    <div class="preview-box" style="background-color: #${hexColor};"></div>
+                    <div class="color-info">
+                        <p>颜色预览</p>
+                        <p>HEX: #${hexColor}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 添加示例输入功能
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tc-code').addEventListener('focus', function() {
+                if (!this.value) this.value = '16711680';
+            });
+            
+            document.getElementById('hex-color').addEventListener('focus', function() {
+                if (!this.value) this.value = '#0000FF';
+            });
+        });
+    </script>
+</body>
+</html>

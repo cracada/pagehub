@@ -107,7 +107,7 @@ max-width:1.75em
 }
 
 #head .h-tools.online > ul {
-max-width:7em
+max-width:1.75em/*7EM*/
 }
 
 #head .h-tools.chm > ul {

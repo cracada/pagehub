@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本格式转换工具</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/punycode/1.4.1/punycode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-crc/0.2.0/crc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 4px solid #3498db;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            color: #ecf0f1;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+        
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            border-top: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .tool-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tool-title i {
+            margin-right: 12px;
+            color: #3498db;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 12px 18px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        button:nth-child(2) {
+            background: #2ecc71;
+        }
+        
+        button:nth-child(2):hover {
+            background: #27ae60;
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 60px;
+            font-family: monospace;
+            word-break: break-all;
+            white-space: pre-wrap;
+            border: 1px dashed #e0e0e0;
+            font-size: 15px;
+        }
+        
+        .hash-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .hash-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .hash-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-family: sans-serif;
+        }
+        
+        .info-text {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+        
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .hash-results {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>文本格式转换工具</h1>
+            <!--p class="subtitle">简洁高效 · 功能完整</p-->
+        </header>
+        
+        <div class="tools-grid">
+            <!-- Base64 编码/解码 -->
+            <div class="tool-card">
+                <h2 class="tool-title">Base64 编码/解码</h2>
+                <textarea id="base64-input" placeholder="输入要编码或解码的文本..."></textarea>
+                <div class="btn-group">
+                    <button onclick="base64Encode()">Base64 编码</button>
+                    <button onclick="base64Decode()">Base64 解码</button>
+                </div>
+                <div class="result" id="base64-result">结果将显示在这里</div>
+            </div>
+            
+            <!-- URL 编码/解码 -->
+            <div class="tool-card">
+                <h2 class="tool-title">URL 编码/解码</h2>
+                <textarea id="url-input" placeholder="输入要编码或解码的URL..."></textarea>
+                <div class="btn-group">
+                    <button onclick="urlEncode()">URL 编码</button>
+                    <button onclick="urlDecode()">URL 解码</button>
+                </div>
+                <div class="result" id="url-result">结果将显示在这里</div>
+            </div>
+            
+            <!-- Unicode 与 ANSI 中文编码 -->
+            <div class="tool-card">
+                <h2 class="tool-title">Unicode ⇄ ANSI 中文编码</h2>
+                <textarea id="unicode-input" placeholder="输入要转换的中文文本..."></textarea>
+                <div class="btn-group">
+                    <button onclick="unicodeToAnsi()">Unicode 转 ANSI</button>
+                    <button onclick="ansiToUnicode()">ANSI 转 Unicode</button>
+                </div>
+                <div class="result" id="unicode-result">结果将显示在这里</div>
+            </div>
+            
+            <!-- 中文URL与Punycode转换 -->
+            <div class="tool-card">
+                <h2 class="tool-title">中文URL ⇄ Punycode</h2>
+                <textarea id="punycode-input" placeholder="输入中文域名或Punycode..."></textarea>
+                <div class="btn-group">
+                    <button onclick="toPunycode()">转 Punycode</button>
+                    <button onclick="fromPunycode()">转 中文URL</button>
+                </div>
+                <div class="result" id="punycode-result">结果将显示在这里</div>
+            </div>
+            
+            <!-- 哈希计算 -->
+            <div class="tool-card">
+                <h2 class="tool-title">哈希值计算</h2>
+                <textarea id="hash-input" placeholder="输入要计算哈希值的文本..."></textarea>
+                <button onclick="calculateHashes()" style="width:100%;margin-bottom:15px">计算哈希值</button>
+                <div class="hash-results">
+                    <div class="hash-item">
+                        <div class="hash-title">MD5</div>
+                        <div id="md5-result">-</div>
+                    </div>
+                    <div class="hash-item">
+                        <div class="hash-title">CRC32</div>
+                        <div id="crc32-result">-</div>
+                    </div>
+                    <div class="hash-item">
+                        <div class="hash-title">SHA-1</div>
+                        <div id="sha1-result">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <p class="info-text">提示：所有转换操作都在浏览器本地完成，数据不会发送到服务器</p>
+        
+        <footer>
+            <p>&copy; 文本格式转换工具  </p>
+        </footer>
+    </div>
+
+    <script>
+        // Base64 编码/解码
+        function base64Encode() {
+            const input = document.getElementById('base64-input').value;
+            if (!input) return;
+            const encoded = btoa(unescape(encodeURIComponent(input)));
+            document.getElementById('base64-result').textContent = encoded;
+        }
+        
+        function base64Decode() {
+            const input = document.getElementById('base64-input').value;
+            if (!input) return;
+            try {
+                const decoded = decodeURIComponent(escape(atob(input)));
+                document.getElementById('base64-result').textContent = decoded;
+            } catch (e) {
+                document.getElementById('base64-result').textContent = "解码失败：输入不是有效的Base64格式";
+            }
+        }
+        
+        // URL 编码/解码
+        function urlEncode() {
+            const input = document.getElementById('url-input').value;
+            if (!input) return;
+            const encoded = encodeURIComponent(input);
+            document.getElementById('url-result').textContent = encoded;
+        }
+        
+        function urlDecode() {
+            const input = document.getElementById('url-input').value;
+            if (!input) return;
+            try {
+                const decoded = decodeURIComponent(input.replace(/\+/g, ' '));
+                document.getElementById('url-result').textContent = decoded;
+            } catch (e) {
+                document.getElementById('url-result').textContent = "解码失败：输入不是有效的URL编码";
+            }
+        }
+        
+        // Unicode 与 ANSI 中文编码转换
+        function unicodeToAnsi() {
+            const input = document.getElementById('unicode-input').value;
+            if (!input) return;
+            let result = '';
+            for (let i = 0; i < input.length; i++) {
+                const code = input.charCodeAt(i);
+                if (code > 0xFF) {
+                    result += '\\u' + code.toString(16).toUpperCase().padStart(4, '0');
+                } else {
+                    result += input[i];
+                }
+            }
+            document.getElementById('unicode-result').textContent = result;
+        }
+        
+        function ansiToUnicode() {
+            const input = document.getElementById('unicode-input').value;
+            if (!input) return;
+            let result = input;
+            result = result.replace(/\\u([0-9a-fA-F]{4})/g, (match, group) => {
+                return String.fromCharCode(parseInt(group, 16));
+            });
+            document.getElementById('unicode-result').textContent = result;
+        }
+        
+        // 中文URL与Punycode转换
+        function toPunycode() {
+            const input = document.getElementById('punycode-input').value;
+            if (!input) return;
+            try {
+                // 提取域名部分
+                let domain = input;
+                if (input.includes('://')) {
+                    const url = new URL(input);
+                    domain = url.hostname;
+                }
+                
+                // 转换域名部分
+                const converted = domain.split('.').map(part => {
+                    return punycode.toASCII(part);
+                }).join('.');
+                
+                // 替换原始输入中的域名
+                const result = input.replace(domain, converted);
+                document.getElementById('punycode-result').textContent = result;
+            } catch (e) {
+                document.getElementById('punycode-result').textContent = "转换失败：" + e.message;
+            }
+        }
+        
+        function fromPunycode() {
+            const input = document.getElementById('punycode-input').value;
+            if (!input) return;
+            try {
+                // 提取域名部分
+                let domain = input;
+                if (input.includes('://')) {
+                    const url = new URL(input);
+                    domain = url.hostname;
+                }
+                
+                // 转换域名部分
+                const converted = domain.split('.').map(part => {
+                    return punycode.toUnicode(part);
+                }).join('.');
+                
+                // 替换原始输入中的域名
+                const result = input.replace(domain, converted);
+                document.getElementById('punycode-result').textContent = result;
+            } catch (e) {
+                document.getElementById('punycode-result').textContent = "转换失败：" + e.message;
+            }
+        }
+        
+        // 哈希计算
+        function calculateHashes() {
+            const input = document.getElementById('hash-input').value;
+            if (!input) return;
+            
+            // 计算MD5
+            const md5 = CryptoJS.MD5(input).toString();
+            document.getElementById('md5-result').textContent = md5;
+            
+            // 计算CRC32
+            const crc32 = crc.crc32(input).toString(16).padStart(8, '0');
+            document.getElementById('crc32-result').textContent = crc32;
+            
+            // 计算SHA-1
+            const sha1 = CryptoJS.SHA1(input).toString();
+            document.getElementById('sha1-result').textContent = sha1;
+        }
+    </script>
+</body>
+</html>
