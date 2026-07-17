@@ -35,9 +35,8 @@ iframe {width: 100%;height: calc(100% - 40px);border: none;}
 
 	document.write ('<iframe id="myIframe" src="http://192.168.1.'+arg+':9978/"></iframe>');
 
-    function copyText(txt){let area =document.createElement('divc');area.innerText=txt;document.body.appendChild(area);let range =document.createRange();range.selectNode(area);let selection = window.getSelection();if (selection.rangeCount>0) selection.removeAllRanges();selection.addRange(range);document.execCommand('copy');selection.removeAllRanges();document.body.removeChild(area);}
-
-
+    function copyText(txt){let area =document.createElement('divc');area.innerText=txt;document.body.appendChild(area);let range =document.createRange();range.selectNode(area);let selection = window.getSelection();if (selection.rangeCount>0) selection.removeAllRanges();selection.addRange(range);document.execCommand('copy');selection.removeAllRanges();document.body.removeChild(area);tip('Copied', 1000)}
+	function tip(m,d){var e=document.createElement('div');e.innerText=m||'提示';e.style.cssText='position:fixed;top:40px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 20px;border-radius:4px;z-index:9999;font-size:14px;';document.body.appendChild(e);setTimeout(function(){e.parentNode.removeChild(e)},d||2000);}
     function changeIframeSrc() {
 var iframe = document.getElementById('myIframe');
 iframe.src = 'http://192.168.1.'+arg+':56789/upload.html';
