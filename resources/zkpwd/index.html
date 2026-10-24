@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fdfcf8">
+<title>ZK_PWD_GEN</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 4vh, 36px);
+    padding: clamp(16px, 5vw, 40px);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #fdfcf8;
+    color: #222;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .title {
+    margin: 0;
+    font-size: clamp(0.8rem, 3.4vw, 1rem);
+    font-weight: 700;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: #b3ada0;
+  }
+
+  /* ---------- 选择区 ---------- */
+  .picker {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(6px, 2vw, 14px);
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field-label {
+    font-size: clamp(.7rem, 2.8vw, .85rem);
+    font-weight: 600;
+    letter-spacing: .18em;
+    color: #a8a397;
+  }
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    width: clamp(96px, 27vw, 140px);
+    height: clamp(58px, 15vw, 74px);
+    padding: 0 .9em;
+    font-family: inherit;
+    font-size: clamp(1.2rem, 5vw, 1.65rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #222;
+    text-align: center;
+    text-align-last: center;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a397' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .45em center;
+    background-size: .7em;
+    border: 2px solid #e6e2d6;
+    border-radius: 14px;
+    box-shadow: 0 2px 0 #efece2;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  select:focus {
+    outline: none;
+    border-color: #e02020;
+    box-shadow: 0 0 0 4px rgba(224, 32, 32, .12);
+  }
+  .colon {
+    display: flex;
+    align-items: center;
+    height: clamp(58px, 15vw, 74px);
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1;
+    color: #c9c4b6;
+  }
+
+  /* ---------- 结果区 ---------- */
+  .result {
+    width: 100%;
+    max-width: 540px;
+    padding: clamp(18px, 5vw, 32px) clamp(12px, 4vw, 24px);
+    background: #fff;
+    border: 2px solid #efece2;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(120, 110, 80, .08);
+  }
+  .pwd {
+    display: block;
+    font-size: clamp(1.9rem, 12vw, 3.75rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: .01em;
+    color: #e02020;
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+  }
+
+  /* ---------- 复制按钮 ---------- */
+  .copy {
+    border: none;
+    border-radius: 999px;
+    padding: .8em 2.2em;
+    font-family: inherit;
+    font-size: clamp(.9rem, 3.6vw, 1.05rem);
+    font-weight: 700;
+    letter-spacing: .05em;
+    color: #fff;
+    background: #222;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform .12s ease, background-color .2s ease;
+  }
+  .copy:active { transform: scale(.95); }
+  .copy.ok { background: #1a9c4b; }
+</style>
+</head>
+<body>
+
+  <h1 class="title">Z K P W D</h1>
+
+  <div class="picker">
+    <label class="field">
+      <span class="field-label">小时</span>
+      <select id="hour" aria-label="小时"></select>
+    </label>
+    <span class="colon">:</span>
+    <label class="field">
+      <span class="field-label">分钟</span>
+      <select id="minute" aria-label="分钟"></select>
+    </label>
+  </div>
+
+  <div class="result">
+    <span id="pwd" class="pwd">0</span>
+  </div>
+
+  <button id="copy" class="copy" type="button">复制</button>
+
+<script>
+(function () {
+  'use strict';
+
+  var hourSel = document.getElementById('hour');
+  var minSel  = document.getElementById('minute');
+  var pwdEl   = document.getElementById('pwd');
+  var copyBtn = document.getElementById('copy');
+
+  /* ---------- 1. 生成下拉选项 ---------- */
+  // 小时：值 "1" ~ "24"（不补零，保持原有字符串拼接规则）
+  for (var x = 1; x <= 24; x++) {
+    var oh = document.createElement('option');
+    oh.value = String(x);
+    oh.textContent = String(x);
+    hourSel.appendChild(oh);
+  }
+  // 分钟：值 "01" ~ "60"
+  for (var y = 1; y <= 60; y++) {
+    var v = y < 10 ? '0' + y : String(y);
+    var om = document.createElement('option');
+    om.value = v;
+    om.textContent = v;
+    minSel.appendChild(om);
+  }
+
+  /* ---------- 2. 默认选中当前时间 ---------- */
+  // 小时范围是 1~24，0 点 -> 24；分钟范围是 01~60，0 分 -> 60
+  var now = new Date();
+  var h = now.getHours() || 24;
+  var m = now.getMinutes() || 60;
+  hourSel.value = String(h);
+  minSel.value = m < 10 ? '0' + m : String(m);
+  if (hourSel.selectedIndex < 0) hourSel.selectedIndex = 0;
+  if (minSel.selectedIndex < 0) minSel.selectedIndex = 0;
+
+  /* ---------- 3. 核心算法（与原来完全一致） ---------- */
+  // 原逻辑：小时与分钟先做【字符串拼接】，再参与减法，最后平方
+  // 例：h="1"、m="05" -> "105" -> 9999 - 105 = 9894 -> 97891236
+  function calc() {
+    var joined = String(hourSel.value) + String(minSel.value);
+    var c = 9999 - Number(joined);
+    pwdEl.textContent = String(c * c);
+  }
+
+  hourSel.addEventListener('change', calc);
+  minSel.addEventListener('change', calc);
+  hourSel.addEventListener('input', calc);
+  minSel.addEventListener('input', calc);
+
+  calc();   // 首次进入即计算（等价于原来的 onLoad="calp()"）
+
+  /* ---------- 4. 一键复制 ---------- */
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy failed'));
+    });
+  }
+
+  var timer = null;
+  function flash(text, ok) {
+    clearTimeout(timer);
+    copyBtn.textContent = text;
+    copyBtn.classList.toggle('ok', ok);
+    timer = setTimeout(function () {
+      copyBtn.textContent = '复制';
+      copyBtn.classList.remove('ok');
+    }, 1400);
+  }
+
+  copyBtn.addEventListener('click', function () {
+    copyText(pwdEl.textContent).then(function () {
+      flash('已复制 ✓', true);
+    }).catch(function () {
+      flash('复制失败', false);
+    });
+  });
+})();
+</script>
+</body>
+</html>
